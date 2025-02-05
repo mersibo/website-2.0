@@ -3,135 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>360° Video with Gyroscope and Accelerometer</title>
+  <title>360° Video with A-Frame</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <style>
-    body, html { margin: 0; height: 100%; overflow: hidden; }
-    canvas { display: block; }
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    a-scene {
+      display: block;
+      height: 100%;
+    }
   </style>
 </head>
 <body>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  
-  <script>
-    let scene, camera, renderer, video, videoTexture, videoMesh;
-    let deviceOrientation, accelerometerData;
-    let targetRotationX = 0, targetRotationY = 0;
-    let currentRotationX = 0, currentRotationY = 0;
-    let rotationSpeed = 0.05;  // Скорость интерполяции для плавности
 
-    // Инициализация сцены
-    function init() {
-      // Создание сцены, камеры и рендерера
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      renderer = new THREE.WebGLRenderer();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
+  <!-- A-Frame Scene -->
+  <a-scene embedded>
+    <!-- 360 Video -->
+    <a-assets>
+      <video id="video360" autoplay loop="true" src="video.mp4"></video>
+    </a-assets>
 
-      // Загружаем видео
-      video = document.createElement('video');
-      video.src = 'video.mp4';  // Путь к видео
-      video.load();
-      video.play();
-      video.loop = true;
+    <a-sky src="#video360" rotation="0 -90 0"></a-sky>
 
-      // Создание текстуры из видео
-      videoTexture = new THREE.VideoTexture(video);
+    <!-- Camera -->
+    <a-entity camera look-controls="pointerLockEnabled: true"></a-entity>
+  </a-scene>
 
-      // Создание сферы для отображения видео
-      const geometry = new THREE.SphereGeometry(500, 60, 40);
-      geometry.scale(-1, 1, 1); // Инвертируем геометрию, чтобы видео показывалось на внутренней поверхности
-      const material = new THREE.MeshBasicMaterial({ map: videoTexture });
-      videoMesh = new THREE.Mesh(geometry, material);
-      scene.add(videoMesh);
-
-      // Камера по умолчанию
-      camera.position.set(0, 0, 0);
-
-      // Анимация
-      animate();
-
-      // Обработчик событий гироскопа и акселерометра
-      window.addEventListener('deviceorientation', handleOrientation, true);
-      window.addEventListener('devicemotion', handleMotion, true);
-    }
-
-    // Функция для обработки данных гироскопа
-    function handleOrientation(event) {
-      if (!event.gamma || !event.beta) {
-        console.error("Гироскоп не поддерживается на этом устройстве");
-        return;
-      }
-
-      deviceOrientation = event;
-
-      // Получаем углы по осям X, Y, Z (в градусах)
-      let gamma = deviceOrientation.gamma; // Наклон влево-вправ (X)
-      let beta = deviceOrientation.beta;   // Наклон вверх-вниз (Y)
-
-      console.log("Гироскоп данные:", gamma, beta);  // Отладочная информация
-
-      // Устанавливаем целевые углы
-      targetRotationX = THREE.MathUtils.degToRad(beta); // Преобразуем в радианы
-      targetRotationY = THREE.MathUtils.degToRad(gamma); // Преобразуем в радианы
-    }
-
-    // Функция для обработки данных акселерометра
-    function handleMotion(event) {
-      if (!event.acceleration) {
-        console.error("Акселерометр не поддерживается на этом устройстве");
-        return;
-      }
-
-      accelerometerData = event;
-
-      // Получаем ускорение по осям X, Y, Z
-      let ax = accelerometerData.acceleration.x;
-      let ay = accelerometerData.acceleration.y;
-      let az = accelerometerData.acceleration.z;
-
-      console.log("Акселерометр данные:", ax, ay, az);  // Отладочная информация
-
-      // Можно использовать данные акселерометра для дополнительных эффектов
-      // Например, можно добавить динамическое управление камерой по осям, если это нужно
-    }
-
-    // Функция для плавного обновления углов камеры
-    function smoothRotation() {
-      // Интерполяция для плавного вращения
-      currentRotationX += (targetRotationX - currentRotationX) * rotationSpeed;
-      currentRotationY += (targetRotationY - currentRotationY) * rotationSpeed;
-
-      // Применяем углы к камере
-      camera.rotation.x = currentRotationX;
-      camera.rotation.y = currentRotationY;
-    }
-
-    // Функция анимации
-    function animate() {
-      requestAnimationFrame(animate);
-
-      // Обновляем текстуру видео
-      if (video.readyState >= video.HAVE_CURRENT_DATA) {
-        videoTexture.needsUpdate = true;
-      }
-
-      // Плавное вращение камеры
-      smoothRotation();
-
-      // Отображаем сцену
-      renderer.render(scene, camera);
-    }
-
-    // Функция для изменения размера окна
-    window.addEventListener('resize', () => {
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-    });
-
-    // Инициализация
-    init();
-  </script>
 </body>
 </html>
