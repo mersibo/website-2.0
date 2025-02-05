@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>360° Video with A-Frame</title>
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <style>
@@ -16,9 +16,8 @@
       display: block;
       height: 100%;
     }
-    /* Отключение кнопки VR */
     .a-enter-vr {
-      display: none;
+      display: none; /* Убираем кнопку VR */
     }
   </style>
 </head>
@@ -28,14 +27,32 @@
   <a-scene embedded vr-mode-ui="enabled: false" touch-action="none">
     <!-- 360 Video -->
     <a-assets>
-      <video id="video360" autoplay loop="true" src="video.mp4"></video>
+      <video id="video360" autoplay loop="true" playsinline webkit-playsinline muted>
+        <source src="path/to/your/360-video.mp4" type="video/mp4">
+      </video>
     </a-assets>
 
-    <a-sky src="#video360" rotation="0 -90 0"></a-sky>
+    <a-sky id="sky" src="#video360" rotation="0 -90 0"></a-sky>
 
-    <!-- Камера с отключенным VR-режимом -->
-    <a-entity camera look-controls="pointerLockEnabled: true" position="0 0 0"></a-entity>
+    <!-- Камера -->
+    <a-entity id="camera" camera look-controls="pointerLockEnabled: true" position="0 0 0"></a-entity>
   </a-scene>
+
+  <script>
+    // Функция для обновления сцены при смене ориентации
+    function handleOrientationChange() {
+      setTimeout(() => {
+        const scene = document.querySelector("a-scene");
+        scene.style.display = "none"; // Скрываем сцену на мгновение
+        void scene.offsetHeight; // Форсируем перерисовку
+        scene.style.display = "block"; // Включаем обратно
+      }, 100);
+    }
+
+    // Обработчики событий для поворота экрана
+    window.addEventListener("orientationchange", handleOrientationChange);
+    window.addEventListener("resize", handleOrientationChange);
+  </script>
 
 </body>
 </html>
