@@ -19,37 +19,63 @@
     .a-enter-vr {
       display: none; /* Убираем кнопку VR */
     }
+    /* Кнопка старта видео */
+    #startButton {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 15px 30px;
+      font-size: 18px;
+      background: #ff5722;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
 
+  <!-- Кнопка для старта видео -->
+  <button id="startButton">Запустить видео</button>
+
   <!-- A-Frame Scene -->
   <a-scene embedded vr-mode-ui="enabled: false" touch-action="none">
-    <!-- 360 Video -->
     <a-assets>
-      <video id="video360" autoplay loop="true" playsinline webkit-playsinline muted>
-        <source src="path/to/your/360-video.mp4" type="video/mp4">
+      <video id="video360" loop playsinline webkit-playsinline muted>
+        <source src="video.mp4" type="video/mp4">
       </video>
     </a-assets>
 
-    <a-sky id="sky" src="#video360" rotation="0 -90 0"></a-sky>
+    <a-sky id="sky" rotation="0 -90 0"></a-sky>
 
-    <!-- Камера -->
-    <a-entity id="camera" camera look-controls="pointerLockEnabled: true" position="0 0 0"></a-entity>
+    <a-entity id="camera" camera look-controls="pointerLockEnabled: true"></a-entity>
   </a-scene>
 
   <script>
-    // Функция для обновления сцены при смене ориентации
+    const video = document.getElementById("video360");
+    const startButton = document.getElementById("startButton");
+
+    startButton.addEventListener("click", () => {
+      video.muted = false;  // Включаем звук
+      video.play(); // Запускаем видео
+      document.getElementById("sky").setAttribute("material", "shader: flat; src: #video360");
+
+      startButton.style.display = "none"; // Убираем кнопку после старта
+    });
+
+    // Исправляем проблему с белым экраном при повороте устройства
     function handleOrientationChange() {
       setTimeout(() => {
         const scene = document.querySelector("a-scene");
-        scene.style.display = "none"; // Скрываем сцену на мгновение
-        void scene.offsetHeight; // Форсируем перерисовку
-        scene.style.display = "block"; // Включаем обратно
+        scene.style.display = "none";
+        void scene.offsetHeight;
+        scene.style.display = "block";
       }, 100);
     }
 
-    // Обработчики событий для поворота экрана
     window.addEventListener("orientationchange", handleOrientationChange);
     window.addEventListener("resize", handleOrientationChange);
   </script>
