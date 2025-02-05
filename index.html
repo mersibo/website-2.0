@@ -16,7 +16,6 @@
     .a-enter-vr {
       display: none; /* Убираем кнопку VR */
     }
-    /* Кнопка старта видео */
     #startButton {
       position: absolute;
       top: 50%;
@@ -41,12 +40,12 @@
   <!-- A-Frame Scene -->
   <a-scene id="scene" embedded vr-mode-ui="enabled: false" touch-action="none">
     <a-assets>
-      <video id="video360" loop playsinline webkit-playsinline muted>
+      <video id="video360" loop playsinline webkit-playsinline crossorigin="anonymous">
         <source src="video.mp4" type="video/mp4">
       </video>
     </a-assets>
 
-    <a-sky id="sky" rotation="0 -90 0"></a-sky>
+    <a-sky id="sky"></a-sky>
 
     <a-entity id="camera" camera look-controls></a-entity>
   </a-scene>
@@ -55,15 +54,24 @@
     const video = document.getElementById("video360");
     const startButton = document.getElementById("startButton");
     const scene = document.getElementById("scene");
+    const sky = document.getElementById("sky");
 
     startButton.addEventListener("click", () => {
-      video.muted = false;  // Включаем звук
-      video.play(); // Запускаем видео
-      document.getElementById("sky").setAttribute("material", "shader: flat; src: #video360");
+      video.muted = false;  
+      video.play().then(() => {
+        console.log("Видео запущено");
+      }).catch(err => console.error("Ошибка при запуске видео:", err));
+
       startButton.style.display = "none"; // Убираем кнопку после старта
     });
 
-    // Фикс белого экрана при повороте экрана
+    // Устанавливаем текстуру, когда видео загрузилось
+    video.addEventListener("loadeddata", () => {
+      console.log("Видео загружено, устанавливаем текстуру...");
+      sky.setAttribute("material", "shader: equirectangular; src: #video360");
+    });
+
+    // Фикс белого экрана при повороте
     function restartScene() {
       scene.style.display = "none";
       requestAnimationFrame(() => {
