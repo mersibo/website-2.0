@@ -30,7 +30,7 @@
 
       // Загружаем видео
       video = document.createElement('video');
-      video.src = 'video.mp4';  // Путь к видео
+      video.src = 'path/to/your/360-video.mp4';  // Путь к видео
       video.load();
       video.play();
       video.loop = true;
@@ -58,11 +58,18 @@
 
     // Функция для обработки данных гироскопа
     function handleOrientation(event) {
+      if (!event.gamma || !event.beta) {
+        console.error("Гироскоп не поддерживается на этом устройстве");
+        return;
+      }
+
       deviceOrientation = event;
 
       // Получаем углы по осям X, Y, Z (в градусах)
       let gamma = deviceOrientation.gamma; // Наклон влево-вправ (X)
       let beta = deviceOrientation.beta;   // Наклон вверх-вниз (Y)
+
+      console.log("Гироскоп данные:", gamma, beta);  // Отладочная информация
 
       // Устанавливаем целевые углы
       targetRotationX = THREE.MathUtils.degToRad(beta); // Преобразуем в радианы
@@ -71,12 +78,19 @@
 
     // Функция для обработки данных акселерометра
     function handleMotion(event) {
+      if (!event.acceleration) {
+        console.error("Акселерометр не поддерживается на этом устройстве");
+        return;
+      }
+
       accelerometerData = event;
 
       // Получаем ускорение по осям X, Y, Z
       let ax = accelerometerData.acceleration.x;
       let ay = accelerometerData.acceleration.y;
       let az = accelerometerData.acceleration.z;
+
+      console.log("Акселерометр данные:", ax, ay, az);  // Отладочная информация
 
       // Можно использовать данные акселерометра для дополнительных эффектов
       // Например, можно добавить динамическое управление камерой по осям, если это нужно
