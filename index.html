@@ -16,12 +16,16 @@
       display: block;
       height: 100%;
     }
+    /* Отключение кнопки VR */
+    .a-enter-vr {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
   <!-- A-Frame Scene -->
-  <a-scene embedded>
+  <a-scene embedded vr-mode-ui="enabled: false" touch-action="none">
     <!-- 360 Video -->
     <a-assets>
       <video id="video360" autoplay loop="true" src="video.mp4"></video>
@@ -29,8 +33,8 @@
 
     <a-sky src="#video360" rotation="0 -90 0"></a-sky>
 
-    <!-- Camera -->
-    <a-entity camera look-controls="pointerLockEnabled: true"></a-entity>
+    <!-- Камера с отключенным VR-режимом -->
+    <a-entity camera look-controls="pointerLockEnabled: true" position="0 0 0"></a-entity>
   </a-scene>
 
 </body>
