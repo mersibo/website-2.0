@@ -45,7 +45,7 @@
       </video>
     </a-assets>
 
-    <a-sky id="sky"></a-sky>
+    <a-sky id="sky" material="shader: equirectangular; src: #video360; texture: true;"></a-sky>
 
     <a-entity id="camera" camera look-controls></a-entity>
   </a-scene>
@@ -53,11 +53,10 @@
   <script>
     const video = document.getElementById("video360");
     const startButton = document.getElementById("startButton");
-    const scene = document.getElementById("scene");
     const sky = document.getElementById("sky");
 
     startButton.addEventListener("click", () => {
-      video.muted = false;  
+      video.muted = false;
       video.play().then(() => {
         console.log("Видео запущено");
       }).catch(err => console.error("Ошибка при запуске видео:", err));
@@ -65,18 +64,28 @@
       startButton.style.display = "none"; // Убираем кнопку после старта
     });
 
-    // Устанавливаем текстуру, когда видео загрузилось
-    video.addEventListener("loadeddata", () => {
-      console.log("Видео загружено, устанавливаем текстуру...");
-      sky.setAttribute("material", "shader: equirectangular; src: #video360");
-    });
+    // Проверяем WebGL
+    if (!navigator.gpu && !window.WebGLRenderingContext) {
+      console.error("WebGL не поддерживается!");
+      alert("Ваш браузер не поддерживает WebGL! Попробуйте открыть в Chrome или Firefox.");
+    }
 
-    // Фикс белого экрана при повороте
+    // Принудительное обновление текстуры
+    function updateTexture() {
+      sky.setAttribute("material", "shader: equirectangular; src: #video360; texture: true;");
+      console.log("Текстура обновлена");
+    }
+
+    video.addEventListener("play", updateTexture);
+    video.addEventListener("loadeddata", updateTexture);
+
+    // Исправляем баг с белым экраном при повороте
     function restartScene() {
-      scene.style.display = "none";
-      requestAnimationFrame(() => {
-        scene.style.display = "block";
-      });
+      sky.setAttribute("visible", "false");
+      setTimeout(() => {
+        sky.setAttribute("visible", "true");
+        updateTexture();
+      }, 100);
     }
 
     window.addEventListener("orientationchange", restartScene);
